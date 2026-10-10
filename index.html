@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arquivo de Excertos & Momentos</title>
+  <style>
+    :root {
+      --bg: #121212;
+      --bg-card: #1e1e1e;
+      --border: #333;
+      --accent: #f39c12;
+      --text: #ffffff;
+      --text-dim: #aaaaaa;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 20px;
+    }
+    .container { max-width: 1100px; margin: 0 auto; }
+    h1 { text-align: center; color: var(--accent); margin-bottom: 4px; }
+    .subtitle { text-align: center; color: var(--text-dim); margin-top: 0; margin-bottom: 25px; font-size: 14px; }
+
+    /* Controlos: pesquisa + filtros */
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .search-box {
+      flex: 1 1 260px;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background-color: var(--bg-card);
+      color: var(--text);
+    }
+    select {
+      padding: 12px;
+      font-size: 14px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background-color: var(--bg-card);
+      color: var(--text);
+    }
+    .result-count {
+      color: var(--text-dim);
+      font-size: 13px;
+      margin-bottom: 20px;
+    }
+
+    /* Grelha de Cartões */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      background-color: var(--bg-card);
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+    }
+    .card h3 { margin-top: 0; color: var(--accent); font-size: 18px; }
+    .card .meta { font-size: 13px; color: var(--text-dim); margin-bottom: 10px; }
+
+    /* Video: lazy-load com thumbnail + botão play */
+    .video-container {
+      position: relative;
+      padding-bottom: 56.25%;
+      height: 0;
+      overflow: hidden;
+      margin-bottom: 10px;
+      border-radius: 4px;
+      background-color: #000;
+      cursor: pointer;
+    }
+    .video-container iframe {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      border: 0;
+    }
+    .video-thumb {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+    .play-button {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 56px; height: 56px;
+      background: rgba(0,0,0,0.7);
+      border: 2px solid var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s ease;
+    }
+    .video-container:hover .play-button { background: var(--accent); }
+    .play-button::after {
+      content: "";
+      border-style: solid;
+      border-width: 10px 0 10px 16px;
+      border-color: transparent transparent transparent #fff;
+      margin-left: 4px;
+    }
+
+    .tags { margin-top: auto; padding-top: 10px; }
+    .tag {
+      display: inline-block;
+      background: #333;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      margin-right: 5px;
+      margin-bottom: 5px;
+    }
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      color: var(--text-dim);
+      padding: 40px 0;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Arquivo de Excertos & Momentos</h1>
+  <p class="subtitle">Repositório de momentos marcantes em filmes, séries, TV ao vivo e podcasts</p>
+
+  <div class="controls">
+    <input type="text" id="searchInput" class="search-box" placeholder="Pesquisar por título, fonte ou tag...">
+    <select id="tipoFilter">
+      <option value="">Todos os tipos</option>
+    </select>
+    <select id="anoFilter">
+      <option value="">Todos os anos</option>
+    </select>
+  </div>
+  <p class="result-count" id="resultCount"></p>
+
+  <div class="grid" id="momentsGrid"></div>
+</div>
+
+<script src="dados.js"></script>
+<script>
+  const grid = document.getElementById('momentsGrid');
+  const searchInput = document.getElementById('searchInput');
+  const tipoFilter = document.getElementById('tipoFilter');
+  const anoFilter = document.getElementById('anoFilter');
+  const resultCount = document.getElementById('resultCount');
+
+  // Popula os dropdowns de filtro dinamicamente a partir dos dados
+  function popularFiltros() {
+    const tipos = [...new Set(momentosMedia.map(m => m.tipo))].sort();
+    const anos = [...new Set(momentosMedia.map(m => m.ano))].sort((a, b) => b - a);
+
+    tipos.forEach(tipo => {
+      const opt = document.createElement('option');
+      opt.value = tipo;
+      opt.textContent = tipo;
+      tipoFilter.appendChild(opt);
+    });
+
+    anos.forEach(ano => {
+      const opt = document.createElement('option');
+      opt.value = ano;
+      opt.textContent = ano;
+      anoFilter.appendChild(opt);
+    });
+  }
+
+  // Carrega o iframe do YouTube só quando o utilizador clica (lazy-load)
+  function carregarVideo(container, youtubeId, timestamp) {
+    const embedUrl = `https://www.youtube.com/embed/${youtubeId}?start=${timestamp}&autoplay=1`;
+    container.innerHTML = `<iframe src="${embedUrl}" allowfullscreen allow="autoplay"></iframe>`;
+  }
+
+  function renderizarMomentos(lista) {
+    grid.innerHTML = '';
+    resultCount.textContent = `${lista.length} momento${lista.length === 1 ? '' : 's'} encontrado${lista.length === 1 ? '' : 's'}`;
+
+    if (lista.length === 0) {
+      grid.innerHTML = '<p class="empty-state">Nenhum momento encontrado com estes filtros.</p>';
+      return;
+    }
+
+    lista.forEach(item => {
+      const thumbUrl = `https://img.youtube.com/vi/${item.youtubeId}/hqdefault.jpg`;
+
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <div class="video-container" data-youtube="${item.youtubeId}" data-timestamp="${item.timestamp}">
+          <img class="video-thumb" src="${thumbUrl}" alt="${item.titulo}" loading="lazy">
+          <div class="play-button"></div>
+        </div>
+        <h3>${item.titulo}</h3>
+        <div class="meta"><strong>${item.fonte}</strong> (${item.ano}) • ${item.tipo}</div>
+        <p style="font-size: 14px; color: #ddd;">${item.descricao}</p>
+        <div class="tags">
+          ${item.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+        </div>
+      `;
+
+      const videoContainer = card.querySelector('.video-container');
+      videoContainer.addEventListener('click', () => {
+        carregarVideo(videoContainer, item.youtubeId, item.timestamp);
+      }, { once: true });
+
+      grid.appendChild(card);
+    });
+  }
+
+  function aplicarFiltros() {
+    const termo = searchInput.value.toLowerCase();
+    const tipoSelecionado = tipoFilter.value;
+    const anoSelecionado = anoFilter.value;
+
+    const filtrados = momentosMedia.filter(item => {
+      const correspondeTexto =
+        item.titulo.toLowerCase().includes(termo) ||
+        item.fonte.toLowerCase().includes(termo) ||
+        item.tags.some(tag => tag.toLowerCase().includes(termo));
+      const correspondeTipo = !tipoSelecionado || item.tipo === tipoSelecionado;
+      const correspondeAno = !anoSelecionado || String(item.ano) === anoSelecionado;
+      return correspondeTexto && correspondeTipo && correspondeAno;
+    });
+
+    renderizarMomentos(filtrados);
+  }
+
+  searchInput.addEventListener('input', aplicarFiltros);
+  tipoFilter.addEventListener('change', aplicarFiltros);
+  anoFilter.addEventListener('change', aplicarFiltros);
+
+  popularFiltros();
+  renderizarMomentos(momentosMedia);
+</script>
+
+</body>
+</html>
