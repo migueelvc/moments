@@ -33,13 +33,13 @@ const momentosMedia = [
     "id": 3,
     "titulo": "Gaffe ao vivo no telejornal",
     "fonte": "Jornal da Noite",
-    "tipo": "TV ao vivo",
+    "tipo": "Live TV",
     "ano": 2021,
     "youtubeId": "dQw4w9WgXcQ",
     "timestamp": 30,
     "descricao": "Apresentador engana-se numa palavra em direto e a equipa desata a rir.",
     "tags": [
-      "TV ao vivo",
+      "Live TV",
       "Gaffe"
     ]
   },

@@ -25,7 +25,7 @@ Também é possível editar à mão: acrescente um objeto à lista em `dados.js`
   id: 5,
   titulo: "Título do momento",
   fonte: "Nome do filme, série ou podcast",
-  tipo: "Filme", // Filme, Série, TV ao vivo, Podcast...
+  tipo: "Filme", // Filme, Série, Live TV, Podcast...
   ano: 2024,
   youtubeId: "ID_DO_VIDEO", // parte depois de "v=" no link do YouTube
   timestamp: 90, // segundo em que o vídeo começa
