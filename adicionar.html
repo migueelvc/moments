@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adicionar Momento</title>
+  <style>
+    :root {
+      --bg: #121212;
+      --bg-card: #1e1e1e;
+      --border: #333;
+      --accent: #f39c12;
+      --text: #ffffff;
+      --text-dim: #aaaaaa;
+      --ok: #2ecc71;
+      --erro: #e74c3c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 20px;
+    }
+    .container { max-width: 1000px; margin: 0 auto; }
+    h1 { color: var(--accent); margin-bottom: 4px; }
+    a { color: var(--accent); }
+    .subtitle { color: var(--text-dim); margin-top: 0; font-size: 14px; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 30px;
+      align-items: start;
+    }
+    @media (max-width: 760px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+
+    /* Passo 1: ligar ao ficheiro */
+    .ficheiro {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 15px;
+      margin: 20px 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+    }
+    .ficheiro p { margin: 0; font-size: 14px; color: var(--text-dim); flex: 1 1 250px; }
+    .ficheiro.ligado { border-color: var(--ok); }
+    .ficheiro.ligado p { color: var(--ok); }
+
+    /* Formulário */
+    form { display: grid; gap: 14px; }
+    .linha { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 500px) {
+      .linha { grid-template-columns: 1fr; }
+    }
+    label { display: block; font-size: 13px; color: var(--text-dim); margin-bottom: 5px; }
+    label .ajuda { font-size: 11px; color: #777; }
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      font-size: 15px;
+      font-family: inherit;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background-color: var(--bg-card);
+      color: var(--text);
+    }
+    input:focus, textarea:focus { outline: none; border-color: var(--accent); }
+    textarea { min-height: 70px; resize: vertical; }
+    .detetado { font-size: 12px; color: var(--ok); margin-top: 4px; min-height: 14px; }
+    .detetado.erro { color: var(--erro); }
+
+    button {
+      padding: 12px 18px;
+      font-size: 15px;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      background: var(--accent);
+      color: #121212;
+      cursor: pointer;
+    }
+    button:hover { filter: brightness(1.1); }
+    button.secundario {
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+    }
+    .mensagem { font-size: 14px; min-height: 18px; }
+    .mensagem.ok { color: var(--ok); }
+    .mensagem.erro { color: var(--erro); }
+
+    /* Pré-visualização (igual aos cartões da página principal) */
+    .preview-titulo { font-size: 13px; color: var(--text-dim); margin: 0 0 8px; }
+    .card {
+      background-color: var(--bg-card);
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      padding: 15px;
+    }
+    .card h3 { margin-top: 0; color: var(--accent); font-size: 18px; }
+    .card .meta { font-size: 13px; color: var(--text-dim); margin-bottom: 10px; }
+    .thumb {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      background: #000;
+      border-radius: 4px;
+      margin-bottom: 10px;
+      display: block;
+    }
+    .tag {
+      display: inline-block;
+      background: #333;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      margin-right: 5px;
+      margin-bottom: 5px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <p><a href="index.html">&larr; Voltar ao arquivo</a></p>
+  <h1>Adicionar momento</h1>
+  <p class="subtitle">Preenche o formulário e carrega em "Adicionar". O momento fica gravado no <code>dados.js</code>. Depois diz "guarda e envia" para aparecer no site online.</p>
+
+  <div class="ficheiro" id="caixaFicheiro">
+    <p id="estadoFicheiro">Passo 1: escolhe o ficheiro <strong>dados.js</strong> da pasta do site (só é preciso uma vez sempre que abres esta página).</p>
+    <button type="button" id="btnFicheiro" class="secundario">Escolher dados.js</button>
+  </div>
+
+  <div class="layout">
+    <form id="formulario" autocomplete="off">
+      <div>
+        <label for="link">Link do YouTube <span class="ajuda">(cola o link; se tiver o tempo, é detetado sozinho)</span></label>
+        <input id="link" required placeholder="https://www.youtube.com/watch?v=...">
+        <div class="detetado" id="linkDetetado"></div>
+      </div>
+
+      <div>
+        <label for="titulo">Título</label>
+        <input id="titulo" required placeholder="Ex.: Apresentador não consegue parar de rir">
+      </div>
+
+      <div class="linha">
+        <div>
+          <label for="fonte">Fonte <span class="ajuda">(filme, série, podcast...)</span></label>
+          <input id="fonte" required placeholder="Ex.: The Office (US)">
+        </div>
+        <div>
+          <label for="tipo">Tipo</label>
+          <input id="tipo" required list="listaTipos" placeholder="Ex.: Série">
+          <datalist id="listaTipos"></datalist>
+        </div>
+      </div>
+
+      <div class="linha">
+        <div>
+          <label for="ano">Ano</label>
+          <input id="ano" type="number" required min="1900" max="2100" placeholder="Ex.: 2024">
+        </div>
+        <div>
+          <label for="inicio">Começa em <span class="ajuda">(ex.: 1:30 ou 90)</span></label>
+          <input id="inicio" placeholder="0:00">
+        </div>
+      </div>
+
+      <div>
+        <label for="descricao">Descrição</label>
+        <textarea id="descricao" placeholder="O que acontece neste momento?"></textarea>
+      </div>
+
+      <div>
+        <label for="tags">Tags <span class="ajuda">(separadas por vírgulas)</span></label>
+        <input id="tags" placeholder="Ex.: Comédia, Bastidores">
+      </div>
+
+      <div>
+        <button type="submit">Adicionar</button>
+      </div>
+      <div class="mensagem" id="mensagem"></div>
+    </form>
+
+    <div>
+      <p class="preview-titulo">Pré-visualização</p>
+      <div class="card" id="preview"></div>
+    </div>
+  </div>
+</div>
+
+<script src="dados.js"></script>
+<script>
+  const $ = id => document.getElementById(id);
+  const campos = ['link', 'titulo', 'fonte', 'tipo', 'ano', 'inicio', 'descricao', 'tags'];
+  let ficheiro = null; // ligação ao dados.js (File System Access API)
+  let momentos = typeof momentosMedia !== 'undefined' ? momentosMedia : [];
+
+  function escapar(texto) {
+    return String(texto).replace(/[&<>"']/g, c => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+  }
+
+  // "1:30", "1m30s", "90" ou "90s" -> segundos
+  function paraSegundos(texto) {
+    texto = String(texto || '').trim().toLowerCase();
+    if (!texto) return 0;
+    if (/^\d+(:\d{1,2}){1,2}$/.test(texto)) {
+      return texto.split(':').reduce((total, parte) => total * 60 + Number(parte), 0);
+    }
+    const m = texto.match(/^(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s?)?$/);
+    if (m && m[0]) return (Number(m[1]) || 0) * 3600 + (Number(m[2]) || 0) * 60 + (Number(m[3]) || 0);
+    return null;
+  }
+
+  function formatarTempo(segundos) {
+    const min = Math.floor(segundos / 60);
+    const seg = String(segundos % 60).padStart(2, '0');
+    return `${min}:${seg}`;
+  }
+
+  // Aceita links watch?v=, youtu.be/, shorts/, embed/ ou só o ID
+  function lerLinkYoutube(texto) {
+    texto = texto.trim();
+    if (/^[\w-]{11}$/.test(texto)) return { id: texto, tempo: null };
+    let url;
+    try { url = new URL(texto.startsWith('http') ? texto : 'https://' + texto); } catch { return null; }
+    let id = null;
+    if (url.hostname.includes('youtu.be')) id = url.pathname.slice(1, 12);
+    else if (url.searchParams.get('v')) id = url.searchParams.get('v');
+    else {
+      const m = url.pathname.match(/\/(?:shorts|embed|live)\/([\w-]{11})/);
+      if (m) id = m[1];
+    }
+    if (!id || !/^[\w-]{11}$/.test(id)) return null;
+    const t = url.searchParams.get('t') || url.searchParams.get('start');
+    return { id, tempo: t ? paraSegundos(t) : null };
+  }
+
+  function lerFormulario() {
+    const video = lerLinkYoutube($('link').value);
+    return {
+      titulo: $('titulo').value.trim(),
+      fonte: $('fonte').value.trim(),
+      tipo: $('tipo').value.trim(),
+      ano: Number($('ano').value) || '',
+      youtubeId: video ? video.id : '',
+      timestamp: paraSegundos($('inicio').value),
+      descricao: $('descricao').value.trim(),
+      tags: $('tags').value.split(',').map(t => t.trim()).filter(Boolean)
+    };
+  }
+
+  function atualizarPreview() {
+    const m = lerFormulario();
+    const thumb = m.youtubeId
+      ? `<img class="thumb" src="https://img.youtube.com/vi/${m.youtubeId}/hqdefault.jpg" alt="">`
+      : '<div class="thumb"></div>';
+    $('preview').innerHTML = `
+      ${thumb}
+      <h3>${escapar(m.titulo || 'Título do momento')}</h3>
+      <div class="meta"><strong>${escapar(m.fonte || 'Fonte')}</strong> (${escapar(m.ano || 'ano')}) • ${escapar(m.tipo || 'Tipo')}</div>
+      <p style="font-size: 14px; color: #ddd;">${escapar(m.descricao || 'Descrição...')}</p>
+      <div>${m.tags.map(t => `<span class="tag">${escapar(t)}</span>`).join('')}</div>
+    `;
+  }
+
+  function preencherTipos() {
+    const tipos = [...new Set(momentos.map(m => m.tipo))].sort();
+    $('listaTipos').innerHTML = tipos.map(t => `<option value="${escapar(t)}">`).join('');
+  }
+
+  function mostrarMensagem(texto, tipo) {
+    $('mensagem').textContent = texto;
+    $('mensagem').className = 'mensagem ' + tipo;
+  }
+
+  // Lê a lista que está escrita dentro do dados.js
+  function lerDadosJs(texto) {
+    return new Function(texto + '\n;return momentosMedia;')();
+  }
+
+  function gerarDadosJs(lista) {
+    return 'const momentosMedia = ' + JSON.stringify(lista, null, 2) + ';\n';
+  }
+
+  async function escolherFicheiro() {
+    if (!window.showOpenFilePicker) {
+      $('estadoFicheiro').innerHTML = 'Este navegador não consegue gravar ficheiros. Sem problema: ao carregar em "Adicionar", é descarregado um <strong>dados.js</strong> novo para substituíres o antigo na pasta do site.';
+      return;
+    }
+    try {
+      const [handle] = await window.showOpenFilePicker({
+        types: [{ description: 'dados.js', accept: { 'text/javascript': ['.js'] } }]
+      });
+      const texto = await (await handle.getFile()).text();
+      momentos = lerDadosJs(texto);
+      ficheiro = handle;
+      $('caixaFicheiro').classList.add('ligado');
+      $('estadoFicheiro').textContent = `✓ Ligado ao ${handle.name} (${momentos.length} momentos)`;
+      preencherTipos();
+    } catch (e) {
+      if (e.name !== 'AbortError') {
+        $('estadoFicheiro').textContent = 'Esse ficheiro não parece ser o dados.js do site. Tenta outra vez.';
+      }
+    }
+  }
+
+  async function guardar(lista) {
+    const conteudo = gerarDadosJs(lista);
+    if (ficheiro) {
+      const escrita = await ficheiro.createWritable();
+      await escrita.write(conteudo);
+      await escrita.close();
+      return 'gravado';
+    }
+    // Plano B: descarregar o ficheiro
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([conteudo], { type: 'text/javascript' }));
+    a.download = 'dados.js';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    return 'descarregado';
+  }
+
+  $('link').addEventListener('input', () => {
+    const texto = $('link').value.trim();
+    const video = texto ? lerLinkYoutube(texto) : null;
+    if (!texto) {
+      $('linkDetetado').textContent = '';
+    } else if (!video) {
+      $('linkDetetado').textContent = 'Não reconheço este link do YouTube.';
+      $('linkDetetado').className = 'detetado erro';
+    } else {
+      $('linkDetetado').textContent = `✓ Vídeo ${video.id}` + (video.tempo ? ` a começar em ${formatarTempo(video.tempo)}` : '');
+      $('linkDetetado').className = 'detetado';
+      if (video.tempo) $('inicio').value = formatarTempo(video.tempo);
+    }
+  });
+
+  campos.forEach(c => $(c).addEventListener('input', atualizarPreview));
+  $('btnFicheiro').addEventListener('click', escolherFicheiro);
+
+  $('formulario').addEventListener('submit', async e => {
+    e.preventDefault();
+    const novo = lerFormulario();
+    if (!novo.youtubeId) return mostrarMensagem('O link do YouTube não é válido.', 'erro');
+    if (novo.timestamp === null) return mostrarMensagem('O tempo de início não é válido (usa 1:30 ou 90).', 'erro');
+    if (window.showOpenFilePicker && !ficheiro) return mostrarMensagem('Primeiro carrega em "Escolher dados.js" (passo 1).', 'erro');
+
+    const id = momentos.reduce((max, m) => Math.max(max, m.id || 0), 0) + 1;
+    const lista = [...momentos, { id, ...novo }];
+
+    try {
+      const resultado = await guardar(lista);
+      momentos = lista;
+      preencherTipos();
+      $('formulario').reset();
+      $('linkDetetado').textContent = '';
+      atualizarPreview();
+      mostrarMensagem(resultado === 'gravado'
+        ? `✓ "${novo.titulo}" adicionado! Agora tens ${lista.length} momentos. Diz "guarda e envia" para pôr online.`
+        : `✓ dados.js descarregado. Substitui o antigo na pasta do site e diz "guarda e envia".`, 'ok');
+      if (ficheiro) $('estadoFicheiro').textContent = `✓ Ligado ao ${ficheiro.name} (${lista.length} momentos)`;
+    } catch (erro) {
+      mostrarMensagem('Não consegui gravar: ' + erro.message, 'erro');
+    }
+  });
+
+  if (!window.showOpenFilePicker) escolherFicheiro();
+  preencherTipos();
+  atualizarPreview();
+</script>
+
+</body>
+</html>

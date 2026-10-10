@@ -10,10 +10,13 @@ Não é preciso instalar nada: basta abrir o ficheiro `index.html` no navegador.
 
 - `index.html` — página, estilos e lógica de pesquisa/filtros.
 - `dados.js` — lista `momentosMedia` com os momentos apresentados.
+- `adicionar.html` — formulário para adicionar momentos sem mexer no código.
 
 ## Adicionar um momento
 
-Acrescente um objeto à lista em `dados.js`:
+A forma mais fácil é abrir `adicionar.html` (no Chrome ou Edge), escolher o ficheiro `dados.js` da pasta do site e preencher o formulário. O momento é gravado diretamente no `dados.js`.
+
+Também é possível editar à mão: acrescente um objeto à lista em `dados.js`:
 
 ```js
 {

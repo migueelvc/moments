@@ -140,7 +140,7 @@
 
 <div class="container">
   <h1>Arquivo de Excertos & Momentos</h1>
-  <p class="subtitle">Repositório de momentos marcantes em filmes, séries, TV ao vivo e podcasts</p>
+  <p class="subtitle">Repositório de momentos marcantes em filmes, séries, TV ao vivo e podcasts · <a href="adicionar.html" style="color: var(--accent);">+ Adicionar momento</a></p>
 
   <div class="controls">
     <input type="text" id="searchInput" class="search-box" placeholder="Pesquisar por título, fonte ou tag...">
@@ -163,6 +163,12 @@
   const tipoFilter = document.getElementById('tipoFilter');
   const anoFilter = document.getElementById('anoFilter');
   const resultCount = document.getElementById('resultCount');
+
+  function escapar(texto) {
+    return String(texto).replace(/[&<>"']/g, c => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+  }
 
   // Popula os dropdowns de filtro dinamicamente a partir dos dados
   function popularFiltros() {
@@ -206,14 +212,14 @@
       card.className = 'card';
       card.innerHTML = `
         <div class="video-container" data-youtube="${item.youtubeId}" data-timestamp="${item.timestamp}">
-          <img class="video-thumb" src="${thumbUrl}" alt="${item.titulo}" loading="lazy">
+          <img class="video-thumb" src="${thumbUrl}" alt="${escapar(item.titulo)}" loading="lazy">
           <div class="play-button"></div>
         </div>
-        <h3>${item.titulo}</h3>
-        <div class="meta"><strong>${item.fonte}</strong> (${item.ano}) • ${item.tipo}</div>
-        <p style="font-size: 14px; color: #ddd;">${item.descricao}</p>
+        <h3>${escapar(item.titulo)}</h3>
+        <div class="meta"><strong>${escapar(item.fonte)}</strong> (${escapar(item.ano)}) • ${escapar(item.tipo)}</div>
+        <p style="font-size: 14px; color: #ddd;">${escapar(item.descricao)}</p>
         <div class="tags">
-          ${item.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+          ${item.tags.map(tag => `<span class="tag">${escapar(tag)}</span>`).join('')}
         </div>
       `;
 
