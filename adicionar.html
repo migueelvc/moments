@@ -4,47 +4,40 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Adicionar Momento</title>
+  <meta name="robots" content="noindex">
+  <script>
+    // Esta página só serve no computador do dono; no site online volta à página principal
+    if (location.protocol !== 'file:' && !['localhost', '127.0.0.1'].includes(location.hostname)) {
+      location.replace('index.html');
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="estilo.css">
+  <script src="tema.js"></script>
   <style>
-    :root {
-      --bg: #121212;
-      --bg-card: #1e1e1e;
-      --border: #333;
-      --accent: #f39c12;
-      --text: #ffffff;
-      --text-dim: #aaaaaa;
-      --ok: #2ecc71;
-      --erro: #e74c3c;
-    }
-    * { box-sizing: border-box; }
-    body {
-      font-family: Arial, sans-serif;
-      background-color: var(--bg);
-      color: var(--text);
-      margin: 0;
-      padding: 20px;
-    }
-    .container { max-width: 1000px; margin: 0 auto; }
-    h1 { color: var(--accent); margin-bottom: 4px; }
-    a { color: var(--accent); }
-    .subtitle { color: var(--text-dim); margin-top: 0; font-size: 14px; }
+    main.container { padding-top: 40px; padding-bottom: 48px; }
+    h1 { font-size: 28px; letter-spacing: -0.02em; margin: 0 0 6px; }
+    .subtitle { color: var(--text-dim); margin: 0; font-size: 15px; max-width: 640px; }
+    code { background: var(--bg-elevado); padding: 1px 6px; border-radius: 4px; font-size: 13px; }
 
     .layout {
       display: grid;
-      grid-template-columns: 1fr 320px;
-      gap: 30px;
+      grid-template-columns: minmax(0, 1fr) 340px;
+      gap: 40px;
       align-items: start;
     }
-    @media (max-width: 760px) {
+    @media (max-width: 800px) {
       .layout { grid-template-columns: 1fr; }
     }
 
     /* Passo 1: ligar ao ficheiro */
     .ficheiro {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 15px;
-      margin: 20px 0;
+      background: var(--bg-elevado);
+      border: 1px solid transparent;
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin: 24px 0 28px;
       display: flex;
       flex-wrap: wrap;
       align-items: center;
@@ -52,92 +45,59 @@
     }
     .ficheiro p { margin: 0; font-size: 14px; color: var(--text-dim); flex: 1 1 250px; }
     .ficheiro.ligado { border-color: var(--ok); }
-    .ficheiro.ligado p { color: var(--ok); }
+    .ficheiro.ligado p { color: var(--ok); font-weight: 600; }
+    .ficheiro .botao { background: var(--bg); }
 
     /* Formulário */
-    form { display: grid; gap: 14px; }
-    .linha { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    form { display: grid; gap: 18px; }
+    .linha { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
     @media (max-width: 500px) {
       .linha { grid-template-columns: 1fr; }
     }
-    label { display: block; font-size: 13px; color: var(--text-dim); margin-bottom: 5px; }
-    label .ajuda { font-size: 11px; color: #777; }
-    input, textarea {
-      width: 100%;
-      padding: 10px;
-      font-size: 15px;
-      font-family: inherit;
-      border-radius: 6px;
-      border: 1px solid var(--border);
-      background-color: var(--bg-card);
-      color: var(--text);
-    }
-    input:focus, textarea:focus { outline: none; border-color: var(--accent); }
-    textarea { min-height: 70px; resize: vertical; }
-    .detetado { font-size: 12px; color: var(--ok); margin-top: 4px; min-height: 14px; }
+    label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+    label .ajuda { font-size: 12px; font-weight: 400; color: var(--text-dim); }
+    input, textarea { width: 100%; }
+    textarea { min-height: 80px; resize: vertical; }
+    .detetado { font-size: 13px; color: var(--ok); margin-top: 6px; min-height: 16px; }
     .detetado.erro { color: var(--erro); }
-
-    button {
-      padding: 12px 18px;
-      font-size: 15px;
-      font-weight: bold;
-      border: none;
-      border-radius: 6px;
-      background: var(--accent);
-      color: #121212;
-      cursor: pointer;
-    }
-    button:hover { filter: brightness(1.1); }
-    button.secundario {
-      background: transparent;
-      color: var(--accent);
-      border: 1px solid var(--accent);
-    }
     .mensagem { font-size: 14px; min-height: 18px; }
     .mensagem.ok { color: var(--ok); }
     .mensagem.erro { color: var(--erro); }
 
-    /* Pré-visualização (igual aos cartões da página principal) */
-    .preview-titulo { font-size: 13px; color: var(--text-dim); margin: 0 0 8px; }
-    .card {
-      background-color: var(--bg-card);
-      border-radius: 8px;
-      overflow: hidden;
-      border: 1px solid var(--border);
-      padding: 15px;
-    }
-    .card h3 { margin-top: 0; color: var(--accent); font-size: 18px; }
-    .card .meta { font-size: 13px; color: var(--text-dim); margin-bottom: 10px; }
-    .thumb {
-      width: 100%;
-      aspect-ratio: 16 / 9;
-      object-fit: cover;
-      background: #000;
-      border-radius: 4px;
-      margin-bottom: 10px;
-      display: block;
-    }
-    .tag {
-      display: inline-block;
-      background: #333;
-      padding: 3px 8px;
-      border-radius: 4px;
-      font-size: 11px;
-      margin-right: 5px;
-      margin-bottom: 5px;
+    /* Pré-visualização */
+    .preview { position: sticky; top: 96px; }
+    .preview-titulo {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-dim);
+      margin: 0 0 10px;
     }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <p><a href="index.html">&larr; Voltar ao arquivo</a></p>
+<header class="topo">
+  <div class="container">
+    <a class="logo" href="index.html">
+      <span class="logo-icone"></span>
+      <span>Momentos</span>
+    </a>
+    <div class="topo-acoes">
+      <button class="botao secundario botao-icone" id="btnTema" type="button"></button>
+      <a class="botao secundario" href="index.html">&larr; <span class="esconder-telemovel">Voltar ao arquivo</span></a>
+    </div>
+  </div>
+</header>
+
+<main class="container">
   <h1>Adicionar momento</h1>
   <p class="subtitle">Preenche o formulário e carrega em "Adicionar". O momento fica gravado no <code>dados.js</code>. Depois diz "guarda e envia" para aparecer no site online.</p>
 
   <div class="ficheiro" id="caixaFicheiro">
     <p id="estadoFicheiro">Passo 1: escolhe o ficheiro <strong>dados.js</strong> da pasta do site (só é preciso uma vez sempre que abres esta página).</p>
-    <button type="button" id="btnFicheiro" class="secundario">Escolher dados.js</button>
+    <button type="button" id="btnFicheiro" class="botao secundario">Escolher dados.js</button>
   </div>
 
   <div class="layout">
@@ -187,17 +147,17 @@
       </div>
 
       <div>
-        <button type="submit">Adicionar</button>
+        <button type="submit" class="botao">Adicionar momento</button>
       </div>
       <div class="mensagem" id="mensagem"></div>
     </form>
 
-    <div>
+    <aside class="preview">
       <p class="preview-titulo">Pré-visualização</p>
       <div class="card" id="preview"></div>
-    </div>
+    </aside>
   </div>
-</div>
+</main>
 
 <script src="dados.js"></script>
 <script>
@@ -265,14 +225,17 @@
   function atualizarPreview() {
     const m = lerFormulario();
     const thumb = m.youtubeId
-      ? `<img class="thumb" src="https://img.youtube.com/vi/${m.youtubeId}/hqdefault.jpg" alt="">`
-      : '<div class="thumb"></div>';
+      ? `<img src="https://img.youtube.com/vi/${m.youtubeId}/hqdefault.jpg" alt="">`
+      : '';
+    const tempo = m.timestamp ? `<span class="tempo">a partir de ${formatarTempo(m.timestamp)}</span>` : '';
     $('preview').innerHTML = `
-      ${thumb}
-      <h3>${escapar(m.titulo || 'Título do momento')}</h3>
-      <div class="meta"><strong>${escapar(m.fonte || 'Fonte')}</strong> (${escapar(m.ano || 'ano')}) • ${escapar(m.tipo || 'Tipo')}</div>
-      <p style="font-size: 14px; color: #ddd;">${escapar(m.descricao || 'Descrição...')}</p>
-      <div>${m.tags.map(t => `<span class="tag">${escapar(t)}</span>`).join('')}</div>
+      <div class="thumb-wrap">${thumb}${tempo}</div>
+      <div>
+        <h3>${escapar(m.titulo || 'Título do momento')}</h3>
+        <div class="meta">${escapar(m.fonte || 'Fonte')} · ${escapar(m.tipo || 'Tipo')} · ${escapar(m.ano || 'Ano')}</div>
+        <p class="descricao">${escapar(m.descricao || 'Descrição...')}</p>
+        ${m.tags.length ? `<div class="tags">${m.tags.map(t => `<span class="tag">${escapar(t)}</span>`).join('')}</div>` : ''}
+      </div>
     `;
   }
 
@@ -297,6 +260,7 @@
 
   async function escolherFicheiro() {
     if (!window.showOpenFilePicker) {
+      $('btnFicheiro').hidden = true;
       $('estadoFicheiro').innerHTML = 'Este navegador não consegue gravar ficheiros. Sem problema: ao carregar em "Adicionar", é descarregado um <strong>dados.js</strong> novo para substituíres o antigo na pasta do site.';
       return;
     }

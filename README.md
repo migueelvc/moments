@@ -8,7 +8,9 @@ Não é preciso instalar nada: basta abrir o ficheiro `index.html` no navegador.
 
 ## Estrutura
 
-- `index.html` — página, estilos e lógica de pesquisa/filtros.
+- `index.html` — página principal com pesquisa e filtros.
+- `estilo.css` — cores e estilo partilhados pelas duas páginas (modo claro e escuro).
+- `tema.js` — botão para mudar entre modo claro e escuro.
 - `dados.js` — lista `momentosMedia` com os momentos apresentados.
 - `adicionar.html` — formulário para adicionar momentos sem mexer no código.
 
